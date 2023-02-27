@@ -1,0 +1,150 @@
+---
+title: "Diamonds Dataset Visualization"
+author: "By Siriwut Thongmak"
+date: "2023-02-25"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+### What's am I doing?
+
+Explore Dataset `diamonds` and create 5 visualizations.
+
+### Explore the data
+```{r message = FALSE, warning=FALSE}
+library(tidyverse)
+head(diamonds)
+```
+
+Dataset Description:
+
+1. `carat`: weight of the diamond (0.2--5.01)
+2. `cut`: quality of the cut (Fair, Good, Very Good, Premium, Ideal)
+3. `color`: diamond color, from J (worst) to D (best)
+4. `clarity`: a measure of the number and size of inclusions within the diamond, from I1 (worst), SI2,                  SI1, VS2, VS1, VVS2, VVS1, IF (best)
+5. `depth`: total depth percentage = z / mean(x, y) = 2 * z / (x + y) (43--79)
+6. `table`: width of top of diamond relative to widest point (43--95)
+
+There are x, y, z data, so let's calculate the volume
+
+### Transforming Data
+
+```{r message = FALSE, warning=FALSE}
+library(tidyverse)
+diamonds <- diamonds %>%
+  mutate(volume = x * y * z) %>%
+  select(-c(x, y, z))
+head(diamonds)
+```
+
+
+### Chart 1 - carat, dept, clarity and color Vs price
+```{r chart1, fig.height=5, fig.width=10, message=FALSE, warning=FALSE}
+library(patchwork)
+p1 <- ggplot(diamonds %>% sample_frac(0.1),aes(carat,price, col=cut))+
+        geom_point(size = 1, alpha=0.5) +
+        geom_rug() +
+        theme_minimal() +
+        labs(title = "Relationship between carat and price",
+        x = "Carat",
+        y = "Price USD",
+        caption = "Datasource: Diamonds") +
+        scale_color_viridis_d(direction = 1)
+
+p2 <- ggplot(diamonds %>% sample_frac(0.1),aes(depth,price, col=cut))+
+        geom_point(size = 1, alpha=0.5) +
+        theme_minimal() +
+        labs(title = "Relationship between Depth and price",
+        x = "Depth",
+        y = "Price USD",
+        caption = "Datasource: Diamonds") +
+        scale_color_viridis_d(direction = 1)
+
+p3 <- ggplot(diamonds %>% sample_frac(0.1),aes(clarity,price, col=cut))+
+        geom_col() +
+        theme_minimal() +
+        labs(title = "Relationship between Clarity and Price",
+        x = "Clarity",
+        y = "Price USD",
+        caption = "Datasource: Diamonds") +
+        scale_color_viridis_d(direction = 1)
+
+p4 <- ggplot(diamonds %>% sample_frac(0.1),aes(color,price, col=cut))+
+        geom_col() +
+        theme_minimal() +
+        labs(title = "Relationship between Color and Price",
+        x = "Color",
+        y = "Price USD",
+        caption = "Datasource: Diamonds") +
+        scale_color_viridis_d(direction = 1)
+
+(p1+p2)/p3/p4
+```
+
+
+
+---------------------------------------------------------------------------------------------
+
+### Chart 2 - Count of Cut type
+
+```{r chart2, message=FALSE, warning=FALSE}
+ggplot(diamonds, aes(cut, fill = cut))+
+  geom_bar(position = "dodge")+
+  theme_minimal() +
+  labs(title = "Count of Cut type",
+       x = "Cut",
+       y = "Count",
+       caption = "Datasource: Diamonds")
+```
+
+
+
+---------------------------------------------------------------------------------------------
+
+### Chart 3 - Density plot of price by color
+```{r chart3, message=FALSE, warning=FALSE}
+ggplot(diamonds, aes(price, fill = color))+
+  geom_density(size = 0, alpha = 0.5, adjust = 2)+
+  theme_minimal() +
+  labs(title = "Density plot of price by color",
+       x = "price",
+       caption = "Datasource: Diamonds")
+```
+
+
+
+---------------------------------------------------------------------------------------------
+
+### Chart 4 - carat vs volume
+
+```{r chart4, message=FALSE, warning=FALSE}
+set.seed(42)
+ggplot(diamonds %>% sample_n(5000), aes(carat,volume, col = cut))+
+  geom_point(size = 3, alpha = 0.3)+
+  geom_rug()+
+  theme_minimal() +
+  labs(title = "carat vs volume",
+       x = "carat",
+       caption = "Datasource: Diamonds") +
+  scale_color_viridis_d(direction = 1)
+```
+
+
+
+---------------------------------------------------------------------------------------------
+
+### Chart 5 - Count of Diamonds by Color and Clarity
+
+```{r chart5, message=FALSE, warning=FALSE}
+ggplot(diamonds, aes(x = clarity, y = color, col = ..n..)) +
+  geom_count() +
+  theme_minimal()+
+  scale_color_gradient(low = "gold",high="purple")+
+  labs(title = "Count of Diamonds by Color and Clarity",
+       x = "Clarity",
+       y = "Color",
+       caption = "Datasource: Diamonds")
+```
+
+
